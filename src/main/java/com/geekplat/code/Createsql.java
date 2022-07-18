@@ -5,6 +5,11 @@ import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 
 import org.dom4j.Element;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -68,6 +73,13 @@ public class Createsql {
          */
         private static String getSql(File xmlfile) throws DocumentException {
             SAXReader saxReader= new SAXReader();
+            // 跳过dtd文件的校验
+            saxReader.setValidation(false);
+            saxReader.setEntityResolver(new EntityResolver() {
+                public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+                    return new InputSource(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?>".getBytes()));
+                }
+            });
             Document document = saxReader.read(xmlfile);
             org.dom4j.Element root = document.getRootElement();
             //取出resultMap标签定义进行解析生成sql语句，不同项目中名称定义可能有不同
